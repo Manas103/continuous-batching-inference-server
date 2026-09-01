@@ -19,7 +19,11 @@ void scatter_kv_to_cache(const float* K_proj, const float* V_proj,
 // logical page index, kPagesPerSeq entries per row) directly from the paged
 // cache -- QK^T, causal bound, softmax, and the P*V reduction all happen in
 // a single kernel launch, one warp per (row, head) since head_dim==32==warp
-// size lets the dot-product reduction map onto warp shuffles.
+// size lets the dot-product reduction map onto warp shuffles. Softmax is
+// computed online (flash-attention-style: running max/sum/accumulator
+// streamed over key positions, see kernels/attention.cu) rather than by
+// materializing an O(kv_len) scores array in shared memory, so kv_len is
+// not bounded by the GPU's shared-memory budget.
 void fused_paged_causal_attention(const float* Q_proj, const float* k_pages,
                                    const float* v_pages,
                                    const int* row_page_table,

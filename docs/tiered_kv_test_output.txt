@@ -1,0 +1,2 @@
+$ ./tiered_kv_test
+16/16 checks passed

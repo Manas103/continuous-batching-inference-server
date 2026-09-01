@@ -1,0 +1,36 @@
+$ ./spill_restore_stress 100000 /tmp/nvme_scratch3/blocks.bin
+spill_restore_stress: 100000 blocks, 131072 bytes/block (128.0 KiB), nvme scratch file /tmp/nvme_scratch3/blocks.bin
+  spilled 10000/100000
+  spilled 20000/100000
+  spilled 30000/100000
+  spilled 40000/100000
+  spilled 50000/100000
+  spilled 60000/100000
+  spilled 70000/100000
+  spilled 80000/100000
+  spilled 90000/100000
+  spilled 100000/100000
+  restored 10000/100000
+  restored 20000/100000
+  restored 30000/100000
+  restored 40000/100000
+  restored 50000/100000
+  restored 60000/100000
+  restored 70000/100000
+  restored 80000/100000
+  restored 90000/100000
+  restored 100000/100000
+
+== spill/restore stress summary ==
+  blocks                    : 100000
+  block size                : 131072 bytes
+  raw total                 : 13.11 GB
+  compressed total (NVMe)   : 12.17 GB (ratio 1.077x)
+  spill  (compress+write)   : 345.2 s  (290 blocks/s)
+  restore (read+decompress) : 88.9 s  (1125 blocks/s)
+  mismatches                : 0 / 100000
+SPILL/RESTORE STRESS PASSED (bit-identical)
+
+real	7m14.143s
+user	6m46.331s
+sys	0m27.689s

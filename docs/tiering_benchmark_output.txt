@@ -1,0 +1,20 @@
+$ ./bench_tiering python/weights.bin
+loading weights from python/weights.bin ...
+workload: prompt_len=32768 tokens (2048 pages of 16), chunked prefill in 512-token steps
+
+full recompute TTFT (prefill + 1 decode step): 3958.30 ms
+
+[TieredKVBlockManager::calibrate] measured on this machine: H2D/D2H 0.20517 ns/byte (4.87 GB/s), disk write+read 1.19997 ns/byte (0.83 GB/s)
+after spill: 512 blocks GPU-resident, 1024 DRAM, 512 NVMe (of 2048 total)
+compression: 201326592 raw bytes -> 187319690 compressed bytes (1.075x)
+
+prefix reuse TTFT (restore 2048 blocks + 1 decode step): 8839.13 ms
+
+== result ==
+full recompute TTFT : 3958.30 ms
+prefix reuse TTFT   : 8839.13 ms
+speedup             : 0.45x
+
+(first measurement, before the pinned-staging-buffer fix, was 0.35x;
+see README Findings for the root cause and why 3.1x was not reached
+after two genuine attempts.)

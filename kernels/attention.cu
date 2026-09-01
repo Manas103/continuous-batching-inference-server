@@ -35,13 +35,30 @@ __inline__ __device__ float warp_reduce_max(float val) {
 }
 
 // One warp per (row, head). blockDim.x == head_dim == 32.
+//
+// Online (flash-attention-style) softmax: instead of materializing all
+// kv_len scores in a shared-memory array (the original version of this
+// kernel did exactly that, in an `extern __shared__ float scores[]` sized
+// to kMaxSeqLen -- see README "what broke" section), each lane streams
+// over key positions once, keeping a running max `m`, a running
+// normalizer `l`, and a running weighted-V accumulator `acc` (one float
+// per lane, since each lane already owns exactly one output dimension).
+// On seeing a new score s_j:
+//   m_new   = max(m, s_j)
+//   correction = exp(m - m_new)          (rescales everything seen so far)
+//   l       = l * correction + exp(s_j - m_new)
+//   acc     = acc * correction + exp(s_j - m_new) * v_j[lane]
+//   m       = m_new
+// After the loop, attn_out = acc / l. This is mathematically identical to
+// the two-pass max-then-sum softmax (same result to fp32 rounding) but
+// needs O(1) extra state per lane instead of O(kv_len) shared memory, so
+// kv_len -- and therefore sequence length -- is no longer bounded by the
+// GPU's shared-memory budget.
 __global__ void fused_attention_kernel(const float* Q_proj, const float* k_pages,
                                         const float* v_pages, const int* row_page_table,
                                         const int* row_query_pos, float* attn_out,
                                         int n_heads, int head_dim, int page_size,
                                         int pages_per_seq) {
-  extern __shared__ float scores[];  // kv_len floats, kv_len <= kMaxSeqLen
-
   int row = blockIdx.x;
   int head = blockIdx.y;
   int lane = threadIdx.x;  // 0..head_dim-1
@@ -52,46 +69,32 @@ __global__ void fused_attention_kernel(const float* Q_proj, const float* k_pages
 
   float q_val = Q_proj[(size_t)row * d_model + head * head_dim + lane];
   const int* page_table_row = row_page_table + row * pages_per_seq;
-
   const float scale = rsqrtf((float)head_dim);
+
+  float m = -INFINITY;   // running max of scores seen so far
+  float l = 0.f;         // running softmax normalizer
+  float acc = 0.f;       // running weighted-V accumulator, this lane's output dim
+
   for (int j = 0; j < kv_len; ++j) {
     int page = page_table_row[j / page_size];
     int offset = j % page_size;
     size_t slot = (size_t)page * page_size * n_heads * head_dim + (size_t)offset * n_heads * head_dim + head * head_dim;
+
     float k_val = k_pages[slot + lane];
-    float dot = warp_reduce_sum(q_val * k_val);
-    if (lane == 0) {
-      scores[j] = dot * scale;
-    }
-  }
-  __syncwarp();
+    float dot = warp_reduce_sum(q_val * k_val);       // whole warp now holds the same dot (lane 0 computed it)
+    float score = __shfl_sync(0xffffffffu, dot, 0) * scale;
 
-  // Parallel max reduction over kv_len scores (each lane scans a strided slice).
-  float local_max = -INFINITY;
-  for (int j = lane; j < kv_len; j += warpSize) local_max = fmaxf(local_max, scores[j]);
-  float row_max = warp_reduce_max(local_max);
-  row_max = __shfl_sync(0xffffffffu, row_max, 0);
+    float m_new = fmaxf(m, score);
+    float correction = expf(m - m_new);
+    float p = expf(score - m_new);
 
-  float local_sum = 0.f;
-  for (int j = lane; j < kv_len; j += warpSize) {
-    float e = expf(scores[j] - row_max);
-    scores[j] = e;
-    local_sum += e;
-  }
-  float row_sum = warp_reduce_sum(local_sum);
-  row_sum = __shfl_sync(0xffffffffu, row_sum, 0);
-  __syncwarp();
-
-  float inv_sum = 1.0f / row_sum;
-  float acc = 0.f;
-  for (int j = 0; j < kv_len; ++j) {
-    int page = page_table_row[j / page_size];
-    int offset = j % page_size;
-    size_t slot = (size_t)page * page_size * n_heads * head_dim + (size_t)offset * n_heads * head_dim + head * head_dim;
     float v_val = v_pages[slot + lane];
-    acc += (scores[j] * inv_sum) * v_val;
+    acc = acc * correction + p * v_val;
+    l = l * correction + p;
+    m = m_new;
   }
-  attn_out[(size_t)row * d_model + head * head_dim + lane] = acc;
+
+  attn_out[(size_t)row * d_model + head * head_dim + lane] = acc / l;
 }
 
 }  // namespace
@@ -114,8 +117,10 @@ void fused_paged_causal_attention(const float* Q_proj, const float* k_pages,
                                    int page_size, int pages_per_seq, cudaStream_t stream) {
   dim3 grid(total_rows, n_heads);
   dim3 block(head_dim);
-  size_t shmem_bytes = pages_per_seq * page_size * sizeof(float);  // upper bound on kv_len
-  fused_attention_kernel<<<grid, block, shmem_bytes, stream>>>(
+  // No dynamic shared memory needed any more: the online-softmax rewrite
+  // keeps only O(1) running state (m, l, acc) per lane in registers,
+  // instead of an O(kv_len) shared-memory scores buffer.
+  fused_attention_kernel<<<grid, block, 0, stream>>>(
       Q_proj, k_pages, v_pages, row_page_table, row_query_pos, attn_out, n_heads,
       head_dim, page_size, pages_per_seq);
   CUDA_CHECK(cudaGetLastError());

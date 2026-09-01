@@ -38,8 +38,15 @@ int main(int argc, char** argv) {
   printf("loading weights from %s ...\n", weights_path.c_str());
   ModelWeights weights = ModelWeights::load(weights_path);
 
-  PagedKVCache cache(kNLayers, /*max_pages=*/kPagesPerSeq * batch_size + 8, kPageSize, kNHeads, kHeadDim);
-  TransformerRunner runner(weights, cache, /*max_total_rows=*/kMaxSeqLen);
+  // reference.bin's sequences are short (<=64 tokens, see python/model.py's
+  // export_weights.py seed batch); size the cache/runner off the actual
+  // batch instead of the global cfg::kMaxSeqLen/kPagesPerSeq (32768/2048,
+  // sized for the 32K-token tiering workload -- see include/config.hpp),
+  // which would otherwise allocate gigabytes this check doesn't need.
+  const int kCheckMaxSeqLen = 128;
+  const int kCheckPagesPerSeq = kCheckMaxSeqLen / kPageSize;
+  PagedKVCache cache(kNLayers, /*max_pages=*/kCheckPagesPerSeq * batch_size + 8, kPageSize, kNHeads, kHeadDim);
+  TransformerRunner runner(weights, cache, /*max_total_rows=*/kCheckMaxSeqLen);
 
   double overall_max_abs = 0.0, overall_sum_abs = 0.0;
   size_t overall_count = 0;

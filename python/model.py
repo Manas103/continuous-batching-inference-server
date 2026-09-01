@@ -15,7 +15,7 @@ N_HEADS = 8
 HEAD_DIM = D_MODEL // N_HEADS
 N_LAYERS = 4
 MLP_HIDDEN = 4 * D_MODEL
-MAX_SEQ_LEN = 128
+MAX_SEQ_LEN = 32768  # must mirror cfg::kMaxSeqLen in include/config.hpp
 
 assert HEAD_DIM * N_HEADS == D_MODEL
 
