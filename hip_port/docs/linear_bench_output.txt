@@ -1,0 +1,18 @@
+$ make bench && ./bench_linear
+hand-written tiled HIP GEMM (16x16 tile, no tensor cores, no autotuning)
+shapes match this repo's TinyGPT forward pass (d_model=256, mlp_hidden=1024)
+
+T=   64 in=  256 out=  256 :   0.0949 ms/call,    88.42 GFLOP/s
+T=   64 in=  256 out= 1024 :   0.2280 ms/call,   147.14 GFLOP/s
+T=   64 in= 1024 out=  256 :   0.3678 ms/call,    91.22 GFLOP/s
+T=   64 in=  256 out= 1000 :   0.2269 ms/call,   144.44 GFLOP/s
+
+Machine: WSL2 Ubuntu 22.04, RTX 4070 SUPER (sm_89, ~35 TFLOP/s fp32 peak),
+built via HIP's CUDA backend (hipcc -> nvcc 12.4), -O2, 200 iterations per
+shape after 5 warm-up calls, hipStreamSynchronize before/after timing.
+88-147 GFLOP/s is roughly 0.3-0.4% of this GPU's fp32 peak: expected for a
+fixed-16x16-tile kernel with no double-buffering, no tensor cores, and no
+autotuning, run against a cuBLAS-class library that would reach a large
+fraction of peak on these shapes. Not a claim on the resume; see
+docs/port_failure_taxonomy.md cause 3 for why this kernel exists instead
+of hipBLAS.

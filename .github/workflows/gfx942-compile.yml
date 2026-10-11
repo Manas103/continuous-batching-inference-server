@@ -1,0 +1,39 @@
+name: gfx942 compile-only (HIP port)
+
+# This workflow never runs on an AMD GPU -- there isn't one in GitHub's
+# runners. It only checks that hip_port's three kernel files still compile
+# for gfx942 (CDNA 3, MI300-class) via ROCm clang, device-code-only, no
+# link and no execution. The runnable build (HIP's CUDA backend, actually
+# executed and diffed against the pre-port reference) only happens on the
+# author's machine, which has a GPU; see hip_port/README section of the
+# main README for that build and its measured numbers.
+
+on:
+  push:
+    paths:
+      - "hip_port/**"
+      - ".github/workflows/gfx942-compile.yml"
+  pull_request:
+    paths:
+      - "hip_port/**"
+
+jobs:
+  gfx942-compile-only:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Add ROCm apt repo
+        run: |
+          wget -q -O /tmp/rocm.gpg.key https://repo.radeon.com/rocm/rocm.gpg.key
+          sudo gpg --dearmor -o /usr/share/keyrings/rocm.gpg --yes /tmp/rocm.gpg.key
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/rocm.gpg] https://repo.radeon.com/rocm/apt/6.2.2 jammy main" | sudo tee /etc/apt/sources.list.d/rocm.list
+          sudo apt-get update
+
+      - name: Install ROCm clang + device libs only
+        run: |
+          sudo apt-get install -y rocm-llvm rocm-device-libs hip-runtime-amd hip-dev
+
+      - name: Compile-only for gfx942
+        working-directory: hip_port
+        run: make gfx942

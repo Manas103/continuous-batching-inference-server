@@ -1,0 +1,11 @@
+loading weights from ../python/weights.bin ...
+seq 0 (len=  1): max_abs_diff=0.000001 mean_abs_diff=0.000000 PASS
+seq 1 (len=  3): max_abs_diff=0.000000 mean_abs_diff=0.000000 PASS
+seq 2 (len=  7): max_abs_diff=0.000001 mean_abs_diff=0.000000 PASS
+seq 3 (len= 16): max_abs_diff=0.000001 mean_abs_diff=0.000000 PASS
+seq 4 (len= 31): max_abs_diff=0.000001 mean_abs_diff=0.000000 PASS
+seq 5 (len= 64): max_abs_diff=0.000001 mean_abs_diff=0.000000 PASS
+
+overall: max_abs_diff=0.000001 mean_abs_diff=0.000000 over 122000 logit values
+CORRECTNESS CHECK PASSED
+run exit: 0

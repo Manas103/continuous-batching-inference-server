@@ -1,0 +1,4 @@
+/opt/rocm/bin/hipcc --offload-arch=gfx942 --cuda-device-only -I include -c kernels/attention.hip.cpp -o /tmp/attention_gfx942.o
+/opt/rocm/bin/hipcc --offload-arch=gfx942 --cuda-device-only -I include -c kernels/elementwise.hip.cpp -o /tmp/elementwise_gfx942.o
+/opt/rocm/bin/hipcc --offload-arch=gfx942 --cuda-device-only -I include -c kernels/linear.hip.cpp -o /tmp/linear_gfx942.o
+gfx942 compile-only exit: 0

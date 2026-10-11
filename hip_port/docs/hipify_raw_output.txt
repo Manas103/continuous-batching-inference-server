@@ -1,0 +1,199 @@
+hipify-clang version:
+AMD LLVM version 18.0.0git
+  Optimized build.
+
+=== hipify-clang ../kernels/attention.cu ===
+/tmp/attention.cu-27163a.hip:24:12: warning: '__shfl_down_sync' is unsupported in 'HIP'.
+   24 |     val += __shfl_down_sync(0xffffffffu, val, offset);
+      |            ^
+/tmp/attention.cu-27163a.hip:32:22: warning: '__shfl_down_sync' is unsupported in 'HIP'.
+   32 |     val = fmaxf(val, __shfl_down_sync(0xffffffffu, val, offset));
+      |                      ^
+/tmp/attention.cu-27163a.hip:85:19: warning: '__shfl_sync' is unsupported in 'HIP'.
+   85 |     float score = __shfl_sync(0xffffffffu, dot, 0) * scale;
+      |                   ^
+3 warnings generated when compiling for host.
+
+[HIPIFY] info: file '../kernels/attention.cu' statistics:
+  CONVERTED refs count: 9
+  UNCONVERTED refs count: 3
+  CONVERSION %: 75.0
+  REPLACED bytes: 56
+  TOTAL bytes: 5684
+  CHANGED lines of code: 5
+  TOTAL lines of code: 127
+  CODE CHANGED (in bytes) %: 1.0
+  CODE CHANGED (in lines) %: 3.9
+  TIME ELAPSED s: 0.70
+[HIPIFY] info: CONVERTED refs by type:
+  error: 2
+  device_function: 5
+  type: 2
+[HIPIFY] info: CONVERTED refs by API:
+  CUDA RT API: 9
+[HIPIFY] info: CONVERTED refs by names:
+  cudaGetLastError: 2
+  cudaStream_t: 2
+  expf: 2
+  fmaxf: 2
+  rsqrtf: 1
+[HIPIFY] info: UNCONVERTED refs by type:
+  device_function: 3
+[HIPIFY] info: UNCONVERTED refs by API:
+  CUDA RT API: 3
+[HIPIFY] info: UNCONVERTED refs by names:
+  __shfl_down_sync: 2
+  __shfl_sync: 1
+
+=== hipify-clang ../kernels/elementwise.cu ===
+
+[HIPIFY] info: file '../kernels/elementwise.cu' statistics:
+  CONVERTED refs count: 12
+  UNCONVERTED refs count: 0
+  CONVERSION %: 100.0
+  REPLACED bytes: 112
+  TOTAL bytes: 3717
+  CHANGED lines of code: 9
+  TOTAL lines of code: 108
+  CODE CHANGED (in bytes) %: 3.0
+  CODE CHANGED (in lines) %: 8.3
+  TIME ELAPSED s: 0.60
+[HIPIFY] info: CONVERTED refs by type:
+  error: 4
+  device_function: 4
+  type: 4
+[HIPIFY] info: CONVERTED refs by API:
+  CUDA RT API: 12
+[HIPIFY] info: CONVERTED refs by names:
+  __syncthreads: 2
+  cudaGetLastError: 4
+  cudaStream_t: 4
+  erff: 1
+  rsqrtf: 1
+
+=== hipify-clang ../kernels/linear.cu ===
+/tmp/linear.cu-3e5997.hip:25:16: warning: Only 'cublasSgemm_v2' version of 'cublasSgemm' is supported in 'HIP'; to hipify it, include 'cublas_v2.h' in the source.
+   25 |   CUBLAS_CHECK(cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, out_features, T,
+      |                ^
+1 warning generated when compiling for host.
+
+[HIPIFY] info: file '../kernels/linear.cu' statistics:
+  CONVERTED refs count: 7
+  UNCONVERTED refs count: 0
+  CONVERSION %: 100.0
+  REPLACED bytes: 79
+  TOTAL bytes: 1496
+  CHANGED lines of code: 6
+  TOTAL lines of code: 34
+  CODE CHANGED (in bytes) %: 5.3
+  CODE CHANGED (in lines) %: 17.6
+  TIME ELAPSED s: 0.81
+[HIPIFY] info: CONVERTED refs by type:
+  error: 1
+  library: 2
+  type: 2
+  numeric_literal: 2
+[HIPIFY] info: CONVERTED refs by API:
+  CUDA RT API: 2
+  cuBLAS API: 5
+[HIPIFY] info: CONVERTED refs by names:
+  CUBLAS_OP_N: 1
+  CUBLAS_OP_T: 1
+  cublasHandle_t: 1
+  cublasSetStream: 1
+  cublasSgemm: 1
+  cudaGetLastError: 1
+  cudaStream_t: 1
+
+=== hipify-clang ../src/model_weights.cpp ===
+
+[HIPIFY] info: file '../src/model_weights.cpp' statistics:
+  CONVERTED refs count: 4
+  UNCONVERTED refs count: 0
+  CONVERSION %: 100.0
+  REPLACED bytes: 50
+  TOTAL bytes: 2589
+  CHANGED lines of code: 4
+  TOTAL lines of code: 80
+  CODE CHANGED (in bytes) %: 1.9
+  CODE CHANGED (in lines) %: 5.0
+  TIME ELAPSED s: 0.93
+[HIPIFY] info: CONVERTED refs by type:
+  memory: 3
+  numeric_literal: 1
+[HIPIFY] info: CONVERTED refs by API:
+  CUDA RT API: 4
+[HIPIFY] info: CONVERTED refs by names:
+  cudaFree: 1
+  cudaMalloc: 1
+  cudaMemcpy: 1
+  cudaMemcpyHostToDevice: 1
+
+=== hipify-clang ../src/paged_kv_cache.cpp ===
+
+[HIPIFY] info: file '../src/paged_kv_cache.cpp' statistics:
+  CONVERTED refs count: 4
+  UNCONVERTED refs count: 0
+  CONVERSION %: 100.0
+  REPLACED bytes: 36
+  TOTAL bytes: 2018
+  CHANGED lines of code: 5
+  TOTAL lines of code: 60
+  CODE CHANGED (in bytes) %: 1.8
+  CODE CHANGED (in lines) %: 8.3
+  TIME ELAPSED s: 0.87
+[HIPIFY] info: CONVERTED refs by type:
+  memory: 4
+[HIPIFY] info: CONVERTED refs by API:
+  CUDA RT API: 4
+[HIPIFY] info: CONVERTED refs by names:
+  cudaFree: 2
+  cudaMalloc: 2
+
+=== hipify-clang ../src/transformer.cpp ===
+
+[HIPIFY] info: file '../src/transformer.cpp' statistics:
+  CONVERTED refs count: 47
+  UNCONVERTED refs count: 0
+  CONVERSION %: 100.0
+  REPLACED bytes: 571
+  TOTAL bytes: 5826
+  CHANGED lines of code: 32
+  TOTAL lines of code: 99
+  CODE CHANGED (in bytes) %: 9.8
+  CODE CHANGED (in lines) %: 32.3
+  TIME ELAPSED s: 0.92
+[HIPIFY] info: CONVERTED refs by type:
+  memory: 36
+  stream: 3
+  library: 2
+  numeric_literal: 6
+[HIPIFY] info: CONVERTED refs by API:
+  CUDA RT API: 45
+  cuBLAS API: 2
+[HIPIFY] info: CONVERTED refs by names:
+  cublasCreate: 1
+  cublasDestroy: 1
+  cudaFree: 15
+  cudaMalloc: 15
+  cudaMemcpyAsync: 6
+  cudaMemcpyDeviceToHost: 1
+  cudaMemcpyHostToDevice: 5
+  cudaStreamCreate: 1
+  cudaStreamDestroy: 1
+  cudaStreamSynchronize: 1
+
+=== hipify-clang ../src/correctness_check.cpp ===
+
+[HIPIFY] info: file '../src/correctness_check.cpp' statistics:
+  CONVERTED refs count: 0
+  UNCONVERTED refs count: 0
+  CONVERSION %: 0.0
+  REPLACED bytes: 0
+  TOTAL bytes: 4240
+  CHANGED lines of code: 1
+  TOTAL lines of code: 101
+  CODE CHANGED (in bytes) %: 0.0
+  CODE CHANGED (in lines) %: 1.0
+  TIME ELAPSED s: 0.98
+

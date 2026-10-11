@@ -1,0 +1,358 @@
+mkdir -p build_obj
+CUDA_PATH=/usr/local/cuda-12.4 HIP_PLATFORM=nvidia HIP_RUNTIME=nvidia /opt/rocm/bin/hipcc -I include -std=c++17 -O2 -c kernels/attention.hip.cpp -o build_obj/attention.o
+kernels/attention.hip.cpp(44): warning #177-D: function "<unnamed>::warp_reduce_max" was declared but never referenced
+                       float warp_reduce_max(float val) {
+                             ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+CUDA_PATH=/usr/local/cuda-12.4 HIP_PLATFORM=nvidia HIP_RUNTIME=nvidia /opt/rocm/bin/hipcc -I include -std=c++17 -O2 -c kernels/elementwise.hip.cpp -o build_obj/elementwise.o
+CUDA_PATH=/usr/local/cuda-12.4 HIP_PLATFORM=nvidia HIP_RUNTIME=nvidia /opt/rocm/bin/hipcc -I include -std=c++17 -O2 -c kernels/linear.hip.cpp -o build_obj/linear.o
+CUDA_PATH=/usr/local/cuda-12.4 HIP_PLATFORM=nvidia HIP_RUNTIME=nvidia /opt/rocm/bin/hipcc -I include -std=c++17 -O2 -c src/model_weights.cpp -o build_obj/model_weights.o
+src/model_weights.cpp(77): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    for (auto* p : owned_) hipFree(p);
+                                  ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+src/model_weights.cpp(77): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    for (auto* p : owned_) hipFree(p);
+                                  ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+src/model_weights.cpp: In member function ‘void ModelWeights::free_all()’:
+src/model_weights.cpp:77:33: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+   77 |   for (auto* p : owned_) hipFree(p);
+      |                          ~~~~~~~^~~
+/opt/rocm-6.2.2/include/hip/nvidia_detail/nvidia_hip_runtime_api.h:1732:26: note: in call to ‘hipError_t hipFree(void*)’, declared here
+ 1732 | inline static hipError_t hipFree(void* ptr) { return hipCUDAErrorTohipError(cudaFree(ptr)); }
+      |                          ^~~~~~~
+/opt/rocm-6.2.2/include/hip/hip_runtime_api.h:399:3: note: ‘hipError_t’ declared here
+  399 | } hipError_t;
+      |   ^~~~~~~~~~
+CUDA_PATH=/usr/local/cuda-12.4 HIP_PLATFORM=nvidia HIP_RUNTIME=nvidia /opt/rocm/bin/hipcc -I include -std=c++17 -O2 -c src/paged_kv_cache.cpp -o build_obj/paged_kv_cache.o
+src/paged_kv_cache.cpp(20): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    for (auto* p : k_pages_) hipFree(p);
+                                    ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+src/paged_kv_cache.cpp(21): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    for (auto* p : v_pages_) hipFree(p);
+                                    ^
+
+src/paged_kv_cache.cpp(20): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    for (auto* p : k_pages_) hipFree(p);
+                                    ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+src/paged_kv_cache.cpp(21): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    for (auto* p : v_pages_) hipFree(p);
+                                    ^
+
+src/paged_kv_cache.cpp: In destructor ‘PagedKVCache::~PagedKVCache()’:
+src/paged_kv_cache.cpp:20:35: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+   20 |   for (auto* p : k_pages_) hipFree(p);
+      |                            ~~~~~~~^~~
+/opt/rocm-6.2.2/include/hip/nvidia_detail/nvidia_hip_runtime_api.h:1732:26: note: in call to ‘hipError_t hipFree(void*)’, declared here
+ 1732 | inline static hipError_t hipFree(void* ptr) { return hipCUDAErrorTohipError(cudaFree(ptr)); }
+      |                          ^~~~~~~
+/opt/rocm-6.2.2/include/hip/hip_runtime_api.h:399:3: note: ‘hipError_t’ declared here
+  399 | } hipError_t;
+      |   ^~~~~~~~~~
+src/paged_kv_cache.cpp:21:35: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+   21 |   for (auto* p : v_pages_) hipFree(p);
+      |                            ~~~~~~~^~~
+/opt/rocm-6.2.2/include/hip/nvidia_detail/nvidia_hip_runtime_api.h:1732:26: note: in call to ‘hipError_t hipFree(void*)’, declared here
+ 1732 | inline static hipError_t hipFree(void* ptr) { return hipCUDAErrorTohipError(cudaFree(ptr)); }
+      |                          ^~~~~~~
+/opt/rocm-6.2.2/include/hip/hip_runtime_api.h:399:3: note: ‘hipError_t’ declared here
+  399 | } hipError_t;
+      |   ^~~~~~~~~~
+CUDA_PATH=/usr/local/cuda-12.4 HIP_PLATFORM=nvidia HIP_RUNTIME=nvidia /opt/rocm/bin/hipcc -I include -std=c++17 -O2 -c src/transformer.cpp -o build_obj/transformer.o
+src/transformer.cpp(34): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_token_ids_); hipFree(d_positions_); hipFree(d_write_page_);
+           ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+src/transformer.cpp(34): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_token_ids_); hipFree(d_positions_); hipFree(d_write_page_);
+                                  ^
+
+src/transformer.cpp(34): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_token_ids_); hipFree(d_positions_); hipFree(d_write_page_);
+                                                         ^
+
+src/transformer.cpp(35): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_write_offset_); hipFree(d_row_page_table_);
+           ^
+
+src/transformer.cpp(35): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_write_offset_); hipFree(d_row_page_table_);
+                                     ^
+
+src/transformer.cpp(36): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_x_); hipFree(d_norm_); hipFree(d_q_); hipFree(d_k_); hipFree(d_v_);
+           ^
+
+src/transformer.cpp(36): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_x_); hipFree(d_norm_); hipFree(d_q_); hipFree(d_k_); hipFree(d_v_);
+                          ^
+
+src/transformer.cpp(36): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_x_); hipFree(d_norm_); hipFree(d_q_); hipFree(d_k_); hipFree(d_v_);
+                                            ^
+
+src/transformer.cpp(36): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_x_); hipFree(d_norm_); hipFree(d_q_); hipFree(d_k_); hipFree(d_v_);
+                                                           ^
+
+src/transformer.cpp(36): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_x_); hipFree(d_norm_); hipFree(d_q_); hipFree(d_k_); hipFree(d_v_);
+                                                                          ^
+
+src/transformer.cpp(37): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_attn_out_); hipFree(d_proj_out_); hipFree(d_mlp_hidden_); hipFree(d_mlp_out_);
+           ^
+
+src/transformer.cpp(37): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_attn_out_); hipFree(d_proj_out_); hipFree(d_mlp_hidden_); hipFree(d_mlp_out_);
+                                 ^
+
+src/transformer.cpp(37): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_attn_out_); hipFree(d_proj_out_); hipFree(d_mlp_hidden_); hipFree(d_mlp_out_);
+                                                       ^
+
+src/transformer.cpp(37): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_attn_out_); hipFree(d_proj_out_); hipFree(d_mlp_hidden_); hipFree(d_mlp_out_);
+                                                                               ^
+
+src/transformer.cpp(38): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_logits_);
+           ^
+
+src/transformer.cpp(39): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipStreamDestroy(stream_);
+                    ^
+
+src/transformer.cpp(34): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_token_ids_); hipFree(d_positions_); hipFree(d_write_page_);
+           ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+src/transformer.cpp(34): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_token_ids_); hipFree(d_positions_); hipFree(d_write_page_);
+                                  ^
+
+src/transformer.cpp(34): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_token_ids_); hipFree(d_positions_); hipFree(d_write_page_);
+                                                         ^
+
+src/transformer.cpp(35): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_write_offset_); hipFree(d_row_page_table_);
+           ^
+
+src/transformer.cpp(35): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_write_offset_); hipFree(d_row_page_table_);
+                                     ^
+
+src/transformer.cpp(36): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_x_); hipFree(d_norm_); hipFree(d_q_); hipFree(d_k_); hipFree(d_v_);
+           ^
+
+src/transformer.cpp(36): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_x_); hipFree(d_norm_); hipFree(d_q_); hipFree(d_k_); hipFree(d_v_);
+                          ^
+
+src/transformer.cpp(36): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_x_); hipFree(d_norm_); hipFree(d_q_); hipFree(d_k_); hipFree(d_v_);
+                                            ^
+
+src/transformer.cpp(36): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_x_); hipFree(d_norm_); hipFree(d_q_); hipFree(d_k_); hipFree(d_v_);
+                                                           ^
+
+src/transformer.cpp(36): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_x_); hipFree(d_norm_); hipFree(d_q_); hipFree(d_k_); hipFree(d_v_);
+                                                                          ^
+
+src/transformer.cpp(37): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_attn_out_); hipFree(d_proj_out_); hipFree(d_mlp_hidden_); hipFree(d_mlp_out_);
+           ^
+
+src/transformer.cpp(37): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_attn_out_); hipFree(d_proj_out_); hipFree(d_mlp_hidden_); hipFree(d_mlp_out_);
+                                 ^
+
+src/transformer.cpp(37): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_attn_out_); hipFree(d_proj_out_); hipFree(d_mlp_hidden_); hipFree(d_mlp_out_);
+                                                       ^
+
+src/transformer.cpp(37): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_attn_out_); hipFree(d_proj_out_); hipFree(d_mlp_hidden_); hipFree(d_mlp_out_);
+                                                                               ^
+
+src/transformer.cpp(38): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipFree(d_logits_);
+           ^
+
+src/transformer.cpp(39): warning #2810-D: ignoring return value type with "nodiscard" attribute
+    hipStreamDestroy(stream_);
+                    ^
+
+src/transformer.cpp: In destructor ‘TransformerRunner::~TransformerRunner()’:
+src/transformer.cpp:34:8: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+   34 |   hipFree(d_token_ids_); hipFree(d_positions_); hipFree(d_write_page_);
+      |   ~~~~~^~~~~~~~~~~~~~
+/opt/rocm-6.2.2/include/hip/nvidia_detail/nvidia_hip_runtime_api.h:1732:26: note: in call to ‘hipError_t hipFree(void*)’, declared here
+ 1732 | inline static hipError_t hipFree(void* ptr) { return hipCUDAErrorTohipError(cudaFree(ptr)); }
+      |                          ^~~~~~~
+/opt/rocm-6.2.2/include/hip/hip_runtime_api.h:399:3: note: ‘hipError_t’ declared here
+  399 | } hipError_t;
+      |   ^~~~~~~~~~
+src/transformer.cpp:34:31: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+   34 |   hipFree(d_token_ids_); hipFree(d_positions_); hipFree(d_write_page_);
+      |                        ~~~~~~~^~~~~~~~~~~~~~
+/opt/rocm-6.2.2/include/hip/nvidia_detail/nvidia_hip_runtime_api.h:1732:26: note: in call to ‘hipError_t hipFree(void*)’, declared here
+ 1732 | inline static hipError_t hipFree(void* ptr) { return hipCUDAErrorTohipError(cudaFree(ptr)); }
+      |                          ^~~~~~~
+/opt/rocm-6.2.2/include/hip/hip_runtime_api.h:399:3: note: ‘hipError_t’ declared here
+  399 | } hipError_t;
+      |   ^~~~~~~~~~
+src/transformer.cpp:34:54: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+   34 |   hipFree(d_token_ids_); hipFree(d_positions_); hipFree(d_write_page_);
+      |                                               ~~~~~~~^~~~~~~~~~~~~~~
+/opt/rocm-6.2.2/include/hip/nvidia_detail/nvidia_hip_runtime_api.h:1732:26: note: in call to ‘hipError_t hipFree(void*)’, declared here
+ 1732 | inline static hipError_t hipFree(void* ptr) { return hipCUDAErrorTohipError(cudaFree(ptr)); }
+      |                          ^~~~~~~
+/opt/rocm-6.2.2/include/hip/hip_runtime_api.h:399:3: note: ‘hipError_t’ declared here
+  399 | } hipError_t;
+      |   ^~~~~~~~~~
+src/transformer.cpp:35:8: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+   35 |   hipFree(d_write_offset_); hipFree(d_row_page_table_);
+      |   ~~~~~^~~~~~~~~~~~~~~~~
+/opt/rocm-6.2.2/include/hip/nvidia_detail/nvidia_hip_runtime_api.h:1732:26: note: in call to ‘hipError_t hipFree(void*)’, declared here
+ 1732 | inline static hipError_t hipFree(void* ptr) { return hipCUDAErrorTohipError(cudaFree(ptr)); }
+      |                          ^~~~~~~
+/opt/rocm-6.2.2/include/hip/hip_runtime_api.h:399:3: note: ‘hipError_t’ declared here
+  399 | } hipError_t;
+      |   ^~~~~~~~~~
+src/transformer.cpp:35:34: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+   35 |   hipFree(d_write_offset_); hipFree(d_row_page_table_);
+      |                           ~~~~~~~^~~~~~~~~~~~~~~~~~~
+/opt/rocm-6.2.2/include/hip/nvidia_detail/nvidia_hip_runtime_api.h:1732:26: note: in call to ‘hipError_t hipFree(void*)’, declared here
+ 1732 | inline static hipError_t hipFree(void* ptr) { return hipCUDAErrorTohipError(cudaFree(ptr)); }
+      |                          ^~~~~~~
+/opt/rocm-6.2.2/include/hip/hip_runtime_api.h:399:3: note: ‘hipError_t’ declared here
+  399 | } hipError_t;
+      |   ^~~~~~~~~~
+src/transformer.cpp:36:8: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+   36 |   hipFree(d_x_); hipFree(d_norm_); hipFree(d_q_); hipFree(d_k_); hipFree(d_v_);
+      |   ~~~~~^~~~~~
+/opt/rocm-6.2.2/include/hip/nvidia_detail/nvidia_hip_runtime_api.h:1732:26: note: in call to ‘hipError_t hipFree(void*)’, declared here
+ 1732 | inline static hipError_t hipFree(void* ptr) { return hipCUDAErrorTohipError(cudaFree(ptr)); }
+      |                          ^~~~~~~
+/opt/rocm-6.2.2/include/hip/hip_runtime_api.h:399:3: note: ‘hipError_t’ declared here
+  399 | } hipError_t;
+      |   ^~~~~~~~~~
+src/transformer.cpp:36:23: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+   36 |   hipFree(d_x_); hipFree(d_norm_); hipFree(d_q_); hipFree(d_k_); hipFree(d_v_);
+      |                ~~~~~~~^~~~~~~~~
+/opt/rocm-6.2.2/include/hip/nvidia_detail/nvidia_hip_runtime_api.h:1732:26: note: in call to ‘hipError_t hipFree(void*)’, declared here
+ 1732 | inline static hipError_t hipFree(void* ptr) { return hipCUDAErrorTohipError(cudaFree(ptr)); }
+      |                          ^~~~~~~
+/opt/rocm-6.2.2/include/hip/hip_runtime_api.h:399:3: note: ‘hipError_t’ declared here
+  399 | } hipError_t;
+      |   ^~~~~~~~~~
+src/transformer.cpp:36:41: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+   36 |   hipFree(d_x_); hipFree(d_norm_); hipFree(d_q_); hipFree(d_k_); hipFree(d_v_);
+      |                                  ~~~~~~~^~~~~~
+/opt/rocm-6.2.2/include/hip/nvidia_detail/nvidia_hip_runtime_api.h:1732:26: note: in call to ‘hipError_t hipFree(void*)’, declared here
+ 1732 | inline static hipError_t hipFree(void* ptr) { return hipCUDAErrorTohipError(cudaFree(ptr)); }
+      |                          ^~~~~~~
+/opt/rocm-6.2.2/include/hip/hip_runtime_api.h:399:3: note: ‘hipError_t’ declared here
+  399 | } hipError_t;
+      |   ^~~~~~~~~~
+src/transformer.cpp:36:56: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+   36 |   hipFree(d_x_); hipFree(d_norm_); hipFree(d_q_); hipFree(d_k_); hipFree(d_v_);
+      |                                                 ~~~~~~~^~~~~~
+/opt/rocm-6.2.2/include/hip/nvidia_detail/nvidia_hip_runtime_api.h:1732:26: note: in call to ‘hipError_t hipFree(void*)’, declared here
+ 1732 | inline static hipError_t hipFree(void* ptr) { return hipCUDAErrorTohipError(cudaFree(ptr)); }
+      |                          ^~~~~~~
+/opt/rocm-6.2.2/include/hip/hip_runtime_api.h:399:3: note: ‘hipError_t’ declared here
+  399 | } hipError_t;
+      |   ^~~~~~~~~~
+src/transformer.cpp:36:71: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+   36 |   hipFree(d_x_); hipFree(d_norm_); hipFree(d_q_); hipFree(d_k_); hipFree(d_v_);
+      |                                                                ~~~~~~~^~~~~~
+/opt/rocm-6.2.2/include/hip/nvidia_detail/nvidia_hip_runtime_api.h:1732:26: note: in call to ‘hipError_t hipFree(void*)’, declared here
+ 1732 | inline static hipError_t hipFree(void* ptr) { return hipCUDAErrorTohipError(cudaFree(ptr)); }
+      |                          ^~~~~~~
+/opt/rocm-6.2.2/include/hip/hip_runtime_api.h:399:3: note: ‘hipError_t’ declared here
+  399 | } hipError_t;
+      |   ^~~~~~~~~~
+src/transformer.cpp:37:8: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+   37 |   hipFree(d_attn_out_); hipFree(d_proj_out_); hipFree(d_mlp_hidden_); hipFree(d_mlp_out_);
+      |   ~~~~~^~~~~~~~~~~~~
+/opt/rocm-6.2.2/include/hip/nvidia_detail/nvidia_hip_runtime_api.h:1732:26: note: in call to ‘hipError_t hipFree(void*)’, declared here
+ 1732 | inline static hipError_t hipFree(void* ptr) { return hipCUDAErrorTohipError(cudaFree(ptr)); }
+      |                          ^~~~~~~
+/opt/rocm-6.2.2/include/hip/hip_runtime_api.h:399:3: note: ‘hipError_t’ declared here
+  399 | } hipError_t;
+      |   ^~~~~~~~~~
+src/transformer.cpp:37:30: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+   37 |   hipFree(d_attn_out_); hipFree(d_proj_out_); hipFree(d_mlp_hidden_); hipFree(d_mlp_out_);
+      |                       ~~~~~~~^~~~~~~~~~~~~
+/opt/rocm-6.2.2/include/hip/nvidia_detail/nvidia_hip_runtime_api.h:1732:26: note: in call to ‘hipError_t hipFree(void*)’, declared here
+ 1732 | inline static hipError_t hipFree(void* ptr) { return hipCUDAErrorTohipError(cudaFree(ptr)); }
+      |                          ^~~~~~~
+/opt/rocm-6.2.2/include/hip/hip_runtime_api.h:399:3: note: ‘hipError_t’ declared here
+  399 | } hipError_t;
+      |   ^~~~~~~~~~
+src/transformer.cpp:37:52: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+   37 |   hipFree(d_attn_out_); hipFree(d_proj_out_); hipFree(d_mlp_hidden_); hipFree(d_mlp_out_);
+      |                                             ~~~~~~~^~~~~~~~~~~~~~~
+/opt/rocm-6.2.2/include/hip/nvidia_detail/nvidia_hip_runtime_api.h:1732:26: note: in call to ‘hipError_t hipFree(void*)’, declared here
+ 1732 | inline static hipError_t hipFree(void* ptr) { return hipCUDAErrorTohipError(cudaFree(ptr)); }
+      |                          ^~~~~~~
+/opt/rocm-6.2.2/include/hip/hip_runtime_api.h:399:3: note: ‘hipError_t’ declared here
+  399 | } hipError_t;
+      |   ^~~~~~~~~~
+src/transformer.cpp:37:76: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+   37 |   hipFree(d_attn_out_); hipFree(d_proj_out_); hipFree(d_mlp_hidden_); hipFree(d_mlp_out_);
+      |                                                                     ~~~~~~~^~~~~~~~~~~~
+/opt/rocm-6.2.2/include/hip/nvidia_detail/nvidia_hip_runtime_api.h:1732:26: note: in call to ‘hipError_t hipFree(void*)’, declared here
+ 1732 | inline static hipError_t hipFree(void* ptr) { return hipCUDAErrorTohipError(cudaFree(ptr)); }
+      |                          ^~~~~~~
+/opt/rocm-6.2.2/include/hip/hip_runtime_api.h:399:3: note: ‘hipError_t’ declared here
+  399 | } hipError_t;
+      |   ^~~~~~~~~~
+src/transformer.cpp:38:8: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+   38 |   hipFree(d_logits_);
+      |   ~~~~~^~~~~~~~~~~
+/opt/rocm-6.2.2/include/hip/nvidia_detail/nvidia_hip_runtime_api.h:1732:26: note: in call to ‘hipError_t hipFree(void*)’, declared here
+ 1732 | inline static hipError_t hipFree(void* ptr) { return hipCUDAErrorTohipError(cudaFree(ptr)); }
+      |                          ^~~~~~~
+/opt/rocm-6.2.2/include/hip/hip_runtime_api.h:399:3: note: ‘hipError_t’ declared here
+  399 | } hipError_t;
+      |   ^~~~~~~~~~
+src/transformer.cpp:39:17: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+   39 |   hipStreamDestroy(stream_);
+      |   ~~~~~~~~~~~~~~^~~~~~~~~
+/opt/rocm-6.2.2/include/hip/nvidia_detail/nvidia_hip_runtime_api.h:2835:26: note: in call to ‘hipError_t hipStreamDestroy(hipStream_t)’, declared here
+ 2835 | inline static hipError_t hipStreamDestroy(hipStream_t stream) {
+      |                          ^~~~~~~~~~~~~~~~
+/opt/rocm-6.2.2/include/hip/hip_runtime_api.h:399:3: note: ‘hipError_t’ declared here
+  399 | } hipError_t;
+      |   ^~~~~~~~~~
+CUDA_PATH=/usr/local/cuda-12.4 HIP_PLATFORM=nvidia HIP_RUNTIME=nvidia /opt/rocm/bin/hipcc -I include -std=c++17 -O2 -c src/correctness_check.cpp -o build_obj/correctness_check.o
+touch build_obj/.stamp
+CUDA_PATH=/usr/local/cuda-12.4 HIP_PLATFORM=nvidia HIP_RUNTIME=nvidia /opt/rocm/bin/hipcc \
+	build_obj/attention.o build_obj/elementwise.o build_obj/linear.o \
+	build_obj/model_weights.o build_obj/paged_kv_cache.o build_obj/transformer.o \
+	build_obj/correctness_check.o -o correctness_check
+build exit: 0
