@@ -1,0 +1,79 @@
+{
+  "1x128": {
+    "latency_ms": 0.04423300000553354,
+    "config": {
+      "BLOCK_M": 64,
+      "BLOCK_N": 16,
+      "num_warps": 4,
+      "num_stages": 1
+    }
+  },
+  "1x256": {
+    "latency_ms": 0.04024950000030003,
+    "config": {
+      "BLOCK_M": 64,
+      "BLOCK_N": 32,
+      "num_warps": 8,
+      "num_stages": 1
+    }
+  },
+  "1x512": {
+    "latency_ms": 0.05018729999619609,
+    "config": {
+      "BLOCK_M": 16,
+      "BLOCK_N": 64,
+      "num_warps": 1,
+      "num_stages": 2
+    }
+  },
+  "1x1024": {
+    "latency_ms": 0.11845550000089133,
+    "config": {
+      "BLOCK_M": 16,
+      "BLOCK_N": 128,
+      "num_warps": 2,
+      "num_stages": 2
+    }
+  },
+  "1x2048": {
+    "latency_ms": 0.6836120000002666,
+    "config": {
+      "BLOCK_M": 16,
+      "BLOCK_N": 128,
+      "num_warps": 2,
+      "num_stages": 2
+    }
+  },
+  "4x128": {
+    "latency_ms": 0.03971239999600584,
+    "config": {
+      "BLOCK_M": 32,
+      "BLOCK_N": 32,
+      "num_warps": 1,
+      "num_stages": 1
+    }
+  },
+  "4x512": {
+    "latency_ms": 0.1150485999914963,
+    "config": {
+      "BLOCK_M": 64,
+      "BLOCK_N": 32,
+      "num_warps": 2,
+      "num_stages": 2
+    }
+  },
+  "8x256": {
+    "latency_ms": 0.07166409999399548,
+    "config": {
+      "BLOCK_M": 32,
+      "BLOCK_N": 16,
+      "num_warps": 1,
+      "num_stages": 1
+    }
+  },
+  "_search_space": {
+    "raw": 128,
+    "after_static_prune": 128,
+    "benchmarked": 124
+  }
+}

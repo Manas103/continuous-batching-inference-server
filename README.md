@@ -1,4 +1,4 @@
-# Continuous-Batching Transformer Inference Server, with a Tiered KV-Cache Manager and a HIP Port
+# Continuous-Batching Transformer Inference Server, with a Tiered KV-Cache Manager, a HIP Port, and a Triton Autotuner
 
 A small GPT-style transformer served by a hand-written C++/CUDA inference
 engine: a paged KV-cache (vLLM-style block allocation instead of one
@@ -8,10 +8,13 @@ the paged cache, a three-tier block manager that spills a sequence's
 KV-cache pages from GPU HBM to host DRAM to NVMe under a cost-aware
 eviction policy with lossless zlib compression, and (the extension
 documented in this pass, `hip_port/`) a HIP port of the inference path
-with its own numerical-parity gate against the same pre-port reference.
-Every number in this README is from an actual run on a real GPU (NVIDIA
-GeForce RTX 4070 SUPER, driver-reported CUDA 12.x, built against CUDA
-12.4) -- nothing here is simulated or hand-waved, including the claims
+with its own numerical-parity gate against the same pre-port reference, and
+(`triton_autotuner/`, documented in this pass) a block-tiled Triton fused
+attention kernel that replaces the hand-written CUDA attention kernel's
+role, with a tile-size/warp-count autotuner searched and pruned on this
+same GPU. Every number in this README is from an actual run on a real GPU
+(NVIDIA GeForce RTX 4070 SUPER, driver-reported CUDA 12.x, built against
+CUDA 12.4) -- nothing here is simulated or hand-waved, including the claims
 below that were not met after genuine debugging.
 
 **Honest framing, up front:**
@@ -30,6 +33,15 @@ below that were not met after genuine debugging.
   stated as exactly that everywhere below. The gfx942 (CDNA 3,
   MI300-class) target is compile-only, in CI, never executed, because
   there is no AMD GPU anywhere in this pipeline.
+- **The Triton kernel's first correctness measurement was `~4.5e-4`, not
+  `1e-6`.** Root cause and the one genuine fix that closed it are in
+  Triton Findings below; reported as measured before and after, not
+  silently fixed and presented as if it were always `1e-6`.
+- The Triton autotuner's raw search space was narrowed from 1,024 to 128
+  configurations before any benchmarking: compiling and correctness-checking
+  all 1,024 did not finish in a practical amount of time on this GPU (see
+  Triton Findings). The 128-configuration space is what was actually
+  searched and pruned; its counts are measured, not targeted.
 
 ## Why this architecture
 
@@ -570,6 +582,147 @@ docs/port_failure_taxonomy.md   the full 6-failure/4-cause writeup
 docs/hipify_raw_output.txt      raw hipify-clang --print-stats output, all 7 files
 docs/hipify_raw/*.before_fix    the two files with a tool-flagged unconverted ref
 docs/*_output.txt               raw output backing every number in this section
+```
+
+## Triton block-tiling and fusion autotuner
+
+`triton_autotuner/` replaces this server's hand-written CUDA fused
+attention kernel's role with a block-tiled Triton kernel, for a standalone
+PyTorch-level prefill pass over this repo's same TinyGPT reference model
+(`python/model.py`), and searches the kernel's tile-size/warp-count space
+for the fastest configuration per input shape.
+
+**Honest framing, up front:**
+- This operates on dense `[B, H, T, head_dim]` Q/K/V tensors for one
+  prefill batch, not through the C++ server's paged KV-cache -- a
+  standalone extension that reuses the server's existing correctness
+  oracle, not a rewire of the serving path itself. The same relationship
+  `hip_port/` has to the CUDA build.
+- Triton's `tl.dot` defaults to TF32 tensor-core matmul for fp32 inputs on
+  this GPU (Ada Lovelace). That is why the first correctness measurement
+  was `~4.5e-4`, not the `1e-6` the resume claims; `input_precision="ieee"`
+  closed it. See Findings.
+- The autotuner's raw search space is 128 configurations, not the 1,024 a
+  first version tried: compiling and correctness-checking all 1,024 did
+  not finish in a practical amount of time on this GPU. See Findings.
+
+### Why a Triton kernel here
+
+XLA:GPU, Google's own GPU compiler, documents block-level tiling to OpenAI
+Triton as one of its three GPU code-generation paths. A block-tiled Triton
+attention kernel is accordingly not an analogy to that compiler's work, it
+is the same mechanism: write the kernel as a small number of tunable tiles
+(`BLOCK_M` query rows, `BLOCK_N` key columns per step) instead of one fixed
+hand-written CUDA kernel, and let an autotuner pick the tile size and warp
+count per shape instead of hard-coding one.
+
+### The kernel
+
+`triton_autotuner/attention_triton.py`'s `_fused_attention_kernel` is a
+causal, online-softmax (flash-attention-style) fused kernel: for each
+`BLOCK_M`-row query tile, it loops over `BLOCK_N`-column key tiles up to
+the query tile's own causal boundary, keeping a running max, running
+normalizer and running weighted-`V` accumulator exactly like the CUDA
+build's own online-softmax rewrite (see above) -- same algorithm, different
+language and a tunable tile shape instead of a fixed one. `model_triton.py`
+substitutes this kernel for `model.py`'s `Block.attn` (everything else:
+layernorm, linear layers, GELU, embeddings, is the unmodified reference
+code) and separately defines `unfused_attn`, the three-separate-op eager
+baseline (`matmul`, `softmax`, `matmul`) the fusion speedup is measured
+against.
+
+### Correctness vs. the same 122,000-logit PyTorch reference
+
+`triton_autotuner/correctness_check.py` loads the CUDA build's own
+`python/weights.bin`/`python/reference.bin` pair (same 6 sequences, same
+122,000 logit values) and runs the Triton-attention model forward instead
+of the CUDA engine, so a pass here is a statement about the attention
+kernel specifically, not a new, independently-checked model.
+
+### Findings
+
+**Triton's default fp32 matmul is TF32, not full fp32, and that is why the
+first measurement missed the reference tolerance's intent.** `tl.dot`
+without an explicit precision argument measured `max_abs_diff=0.000451`
+over the 122,000 logits -- inside the correctness check's own `5e-3` pass
+threshold, but nowhere near the CUDA build's `1e-6`. Root cause: on this
+GPU's Ada Lovelace tensor cores, Triton's `tl.dot` silently uses TF32
+(a reduced-mantissa format) for fp32 inputs unless told otherwise. Fix
+(one genuine attempt): `input_precision="ieee"` on both `tl.dot` calls in
+the kernel. Re-measured: `max_abs_diff=0.000001`, matching the CUDA build's
+own tolerance at the same printed precision.
+
+**The planned 1,024-configuration search space did not finish compiling in
+a practical amount of time.** `BLOCK_M, BLOCK_N in {16,32,64,128}`,
+`num_warps in {1,2,4,8}`, `num_stages in {1,2,3,4}` is `4*4*4*4=1024`
+configurations; a correctness canary over all 1,024 (each one a distinct
+Triton JIT compile) was still not done after several minutes and climbing
+GPU memory from cached kernel binaries. Fix: `num_stages` narrowed to
+`{1,2}` (`128` configurations), which finished compiling and
+correctness-checking in a little over 200 seconds total
+(`docs/autotune_search_output.txt`). This is a real scope reduction,
+stated here, not a hidden one; the measured counts below are over the
+128-configuration space, not 1,024.
+
+### Measured results: Triton autotuner
+
+Machine: WSL2 Ubuntu 22.04, RTX 4070 SUPER (sm_89), CUDA 12.4 (nvidia HIP
+backend's own `nvcc`), PyTorch 2.6.0+cu124, Triton 3.2.0 (bundled with that
+PyTorch build), Python 3.10.12.
+
+**Claim: "outputs within 1e-6 of a 122,000-logit reference."** Measured
+**`1e-6`** (`max_abs_diff=0.000001`) over the same 122,000 logit values as
+the CUDA build's own check. **Met**, after one genuine fix attempt (TF32,
+see Findings). (`docs/correctness_output.txt`)
+
+**Claim: "search cut from 1,024 configurations to 148 at no loss in
+best-found latency."** The raw space actually searched was **128**
+configurations (narrowed from a 1,024-configuration space that did not
+finish compiling, see Findings): **0** were removed by static pruning
+(every `num_warps <= BLOCK_M` combination in this narrowed space is a
+legal launch), **4** failed to compile/launch on the correctness canary,
+**0** ran but failed the correctness canary, leaving **124** configurations
+actually benchmarked across all 8 shapes (992 (config, shape) latency
+measurements). **Not met**: the claim's shape (a search reduced from a
+large raw space to a much smaller benchmarked one) holds, but neither
+number matches -- 128 raw, not 1,024 (see Findings for why), and 124
+benchmarked, not 148. (`docs/autotune_search_output.txt`,
+`docs/autotune_best_configs.json`)
+
+**Claim: "2.4x median speedup over the unfused baseline across 8 shapes on
+one RTX 4070 SUPER."** Measured **2.153x** median speedup over 8 shapes
+(`B=1`: `T` in `{128,256,512,1024,2048}`; `B=4`: `T` in `{128,512}`; `B=8`:
+`T=256`), using a fixed `BLOCK_M=64, BLOCK_N=64, num_warps=4, num_stages=2`
+config rather than the best per-shape config from `autotune.py` (see
+Building and running). Per-shape speedup ranged 1.028x (`B=1,T=256`) to
+9.003x (`B=1,T=2048`). **Not met** on the exact figure; the direction (a
+real, substantial fusion speedup) holds. (`docs/fusion_benchmark_output.txt`)
+
+### Building and running
+
+```bash
+cd triton_autotuner
+python3.10 -m venv ../triton_venv && source ../triton_venv/bin/activate
+pip install torch --index-url https://download.pytorch.org/whl/cu124
+pip install numpy
+
+cd ../python && python export_weights.py && cd ../triton_autotuner
+
+python correctness_check.py   # Triton attention vs. the 122,000-logit reference
+python autotune.py            # search + prune, writes docs/autotune_best_configs.json
+python bench_fusion.py         # fused vs. unfused, 8 shapes, median speedup
+```
+
+### Layout (triton_autotuner/)
+
+```
+attention_triton.py   the fused kernel and its autotune_configs() search space
+model_triton.py        TinyGPT with Triton attention substituted, plus the unfused baseline
+correctness_check.py   diffs against python/reference.bin
+autotune.py             static + correctness pruning, per-shape benchmark, writes docs/
+bench_fusion.py         fused-vs-unfused median speedup across 8 shapes
+docs/*_output.txt       raw output backing every number in this section
+docs/autotune_best_configs.json  best config per benchmarked shape
 ```
 
 ## Known limitations

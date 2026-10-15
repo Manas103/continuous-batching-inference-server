@@ -1,0 +1,30 @@
+raw configuration space: 128
+after static pruning (illegal warp/tile combinations): 128
+  correctness pass: 0/128 (0.0s elapsed)
+  correctness pass: 10/128 (6.7s elapsed)
+  correctness pass: 20/128 (12.4s elapsed)
+  correctness pass: 30/128 (23.4s elapsed)
+  correctness pass: 40/128 (29.0s elapsed)
+  correctness pass: 50/128 (38.1s elapsed)
+  correctness pass: 60/128 (57.0s elapsed)
+  correctness pass: 70/128 (65.5s elapsed)
+  correctness pass: 80/128 (74.0s elapsed)
+  correctness pass: 90/128 (116.1s elapsed)
+  correctness pass: 100/128 (138.3s elapsed)
+  correctness pass: 110/128 (158.9s elapsed)
+  correctness pass: 120/128 (209.2s elapsed)
+compile/launch failures on the canary input: 4
+ran but failed the correctness canary (diff >= 5e-3): 0
+configurations actually benchmarked: 124
+shape B=1 T=128: best_latency=0.0442 ms, config={'BLOCK_M': 64, 'BLOCK_N': 16, 'num_warps': 4, 'num_stages': 1}
+shape B=1 T=256: best_latency=0.0402 ms, config={'BLOCK_M': 64, 'BLOCK_N': 32, 'num_warps': 8, 'num_stages': 1}
+shape B=1 T=512: best_latency=0.0502 ms, config={'BLOCK_M': 16, 'BLOCK_N': 64, 'num_warps': 1, 'num_stages': 2}
+shape B=1 T=1024: best_latency=0.1185 ms, config={'BLOCK_M': 16, 'BLOCK_N': 128, 'num_warps': 2, 'num_stages': 2}
+shape B=1 T=2048: best_latency=0.6836 ms, config={'BLOCK_M': 16, 'BLOCK_N': 128, 'num_warps': 2, 'num_stages': 2}
+shape B=4 T=128: best_latency=0.0397 ms, config={'BLOCK_M': 32, 'BLOCK_N': 32, 'num_warps': 1, 'num_stages': 1}
+shape B=4 T=512: best_latency=0.1150 ms, config={'BLOCK_M': 64, 'BLOCK_N': 32, 'num_warps': 2, 'num_stages': 2}
+shape B=8 T=256: best_latency=0.0717 ms, config={'BLOCK_M': 32, 'BLOCK_N': 16, 'num_warps': 1, 'num_stages': 1}
+
+total (config, shape) latency measurements taken: 992
+search went from 128 raw configurations to 124 benchmarked
+wrote /mnt/c/Users/Manas/Downloads/Auto Job Applier/Total Job Application process flow/projects/continuous-batching-inference-server/triton_autotuner/docs/autotune_best_configs.json
